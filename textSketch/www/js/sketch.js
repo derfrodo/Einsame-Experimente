@@ -25,7 +25,7 @@ function draw() {
 
     //stroke(255,0,255);
     stroke(255, 149, 0);
-    fill(255);
+    fill(255,255,0);
     background(0)
 
     if (img) {
@@ -36,15 +36,18 @@ function draw() {
     // let txt = "Teil 1:\r\n*p5js\r\n*socket.io\r\n";
     let txtSize = 296;
 
-    let txt = "*socket.io\r\n*p5js\r\n";
+textFont("Segoe UI")
+textStyle(BOLD)
+
+    let txt = "Tabellen\r\nals Bild\r\n";
     textAlign(RIGHT, TOP);
     textSize(txtSize);
-    text(txt, width - 40, 40);
+    text(txt, width - 40, 0);
 
     let txtNr = `Teil ${currentNumber}`;
     textAlign(LEFT, TOP);
     textSize(txtSize);
-    text(txtNr, 40, height - (txtSize + 40));
+    text(txtNr, 40, height - (txtSize + 40 * 2));
 }
 
 function saveImg(){
