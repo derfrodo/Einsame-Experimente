@@ -39,7 +39,7 @@ function draw() {
 textFont("Segoe UI")
 textStyle(BOLD)
 
-    let txt = "Tabellen\r\nals Bild\r\n";
+    let txt = "Tabelle\r\nals Bild\r\n";
     textAlign(RIGHT, TOP);
     textSize(txtSize);
     text(txt, width - 40, 0);
