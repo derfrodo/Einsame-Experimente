@@ -1,0 +1,5 @@
+#Mögliche node module, damit wir nicht was hochladen, was wir nicht wollen
+node_modules/**/*
+
+#sollte npm mal wieder .log erstellen ^^
+*.log

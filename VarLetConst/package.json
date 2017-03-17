@@ -1,0 +1,18 @@
+{
+  "name": "var_let_const",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/derfrodo/Einsame-Experimente/issues"
+  },
+  "homepage": "https://github.com/derfrodo/Einsame-Experimente#readme",
+  "dependencies": {
+    "p5": "^0.5.7"
+  }
+}
