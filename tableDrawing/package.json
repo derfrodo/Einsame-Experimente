@@ -1,0 +1,26 @@
+{
+  "name": "table_drawing",
+  "version": "1.0.0",
+  "description": "Drawing an img into a table",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./node_modules/nodemon/bin/nodemon.js --watch server.js ./server.js",
+    "open": "start http://localhost:3000",
+    "dev": "concurrently --kill-others \"npm run start\" \"npm run open\""
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/derfrodo/Einsame-Experimente/issues"
+  },
+  "homepage": "https://github.com/derfrodo/Einsame-Experimente#readme",
+  "dependencies": {
+    "express": "^4.15.2",
+    "nodemon": "^1.11.0",
+    "p5": "^0.5.7"
+  },
+  "devDependencies": {
+    "concurrently": "^3.4.0"
+  }
+}
