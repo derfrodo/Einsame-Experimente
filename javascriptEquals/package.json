@@ -1,0 +1,14 @@
+{
+  "name": "blank_sketch",
+  "version": "1.0.0",
+  "description": "Just a blank sketch, to be used to scaffold a project real quick",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "p5": "^0.5.7"
+  }
+}
