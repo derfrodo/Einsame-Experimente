@@ -66,8 +66,55 @@ function draw() {
 
 };
 
+/** http://stackoverflow.com/questions/3959211/fast-factorial-function-in-javascript */
+function sFact(num) {
+    var rval = 1;
+    for (var i = 2; i <= num; i++)
+        rval = rval * i;
+    return rval;
+}
+
 function createNextGeneration() {
     generation++;
+
+    let sortedRockets = rockets.slice().sort((a, b) => {
+        return a.fitness < b.fitness ? -1 :
+            (a.fitness > b.fitness ? 1 : 0);
+    })
+
+    let lastPropability = 0;
+    //https://en.wikipedia.org/wiki/Fitness_proportionate_selection
+    for (let i = 0; i < sortedRockets.length; i++) {
+        let rocket = sortedRockets[i];
+
+        let nextPropability = lastPropability + ((i + 1) / sFact(sortedRockets.length));
+
+        rocket.minProp = lastPropability;
+        rocket.maxProp = nextPropability;
+
+        lastPropability = nextPropability;
+    }
+
+    let deleted = 0;
+    while (deleted < generationSize / 4) {
+        let value = random();
+        for (let i = 0; i < sortedRockets; i++) {
+            let rocket = sortedRockets[i];
+            if (!rocket) {
+                continue;
+            }
+            if (rocket.minProp > value) {
+                break;
+            }
+
+            if (rocket.minProp <= value && rocket.maxProp > value) {
+                sortedRockets.splice(i, 1);
+                deleted++;
+                break;
+            }
+        }
+    }
+    console.log(sortedRockets);
 
     rockets = [];
     for (let i = 0; i < generationSize; i++) {
@@ -89,12 +136,14 @@ function Rocket(x_, y_, angle_, dna_) {
     this.angle = angle_;
 
     this.dna = dna_;
+    this.fitness = 0;
 
     this.update = () => {
         let direction = this.dna[floor(this.pos.x / cellSize) + floor(this.pos.y / cellSize) * cols]
         // console.log(direction)
         this.pos.add(direction.x, direction.y);
         this.angle = direction.heading();
+        this.calculateFitness();
     }
 
     this.show = () => {
@@ -118,8 +167,8 @@ function Rocket(x_, y_, angle_, dna_) {
         pop();
     }
 
-
     this.calculateFitness = () => {
-        return this.pos.dist()
+        this.fitness = 1 / (1 + this.pos.dist(target.pos));
+        return this.fitness;
     }
 }
