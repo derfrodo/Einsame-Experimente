@@ -1,37 +1,101 @@
+var rockets;
+var generationSize = 10;
+
+var startpoint = { x: 10, y: 50, }
+var target;
+var cellSize = 10;
+var cols;
+var rows;
+var cellCount;
+
+var lifespan = 0;
+var generation = 0;
+
+var pLife;
+var pGen;
+
 function setup() {
+    frameRate(10);
     createCanvas(640, 480);
+    pLife = createP('')
+    pGen = createP('')
+
     noSmooth();
     background(155);
 
-    rocket = new Rocket(50, 50, 0);
+    target = { pos: createVector(580, 240), r: 24, };
 
+
+    cols = width / cellSize;
+    rows = height / cellSize;
+    cellCount = rows * cols;
+
+    rockets = [];
+    for (let i = 0; i < generationSize; i++) {
+        let dna = [];
+
+        for (let j = 0; j < cellCount; j++) {
+            let data = p5.Vector.fromAngle(random(2 * PI));
+            dna.push(data);
+        }
+
+        let rocket = new Rocket(startpoint.x, startpoint.y, random(2 * PI), dna);
+        rockets.push(rocket);
+    }
+
+    lifespan = 100;
 };
 
 function draw() {
+    background(155);
     stroke(100);
     fill(0);
-    ellipse(target.x, target.y, target.r);
+    ellipse(target.pos.x, target.pos.y, target.r);
+    for (let i = 0; i < generationSize; i++) {
+        let rocket = rockets[i];
+        rocket.show();
+        rocket.update();
+    }
 
-    rocket.show();
+    lifespan--;
+    if (lifespan <= 0) {
+        createNextGeneration();
+    }
+    pLife.html('Lifespan: ' + lifespan);
+    pGen.html('Generation: ' + generation);
+
 };
 
-var rocket;
-var poolSize = 100;
+function createNextGeneration() {
+    generation++;
 
-var startpoint = {
-    x: 10,
-    y: 50,
+    rockets = [];
+    for (let i = 0; i < generationSize; i++) {
+        let dna = [];
+
+        for (let j = 0; j < cellCount; j++) {
+            let data = p5.Vector.fromAngle(random(2 * PI));
+            dna.push(data);
+        }
+
+        let rocket = new Rocket(startpoint.x, startpoint.y, random(2 * PI), dna);
+        rockets.push(rocket);
+    }
+    lifespan = 100;
 }
-
-var target = {
-    x: 580,
-    y: 240,
-    r: 24,
-};
 
 function Rocket(x_, y_, angle_, dna_) {
     this.pos = createVector(x_, y_);
     this.angle = angle_;
+
+    this.dna = dna_;
+
+    this.update = () => {
+        let direction = this.dna[floor(this.pos.x / cellSize) + floor(this.pos.y / cellSize) * cols]
+        // console.log(direction)
+        this.pos.add(direction.x, direction.y);
+        this.angle = direction.heading();
+    }
 
     this.show = () => {
 
@@ -53,5 +117,9 @@ function Rocket(x_, y_, angle_, dna_) {
         endShape(CLOSE);
         pop();
     }
-    
+
+
+    this.calculateFitness = () => {
+        return this.pos.dist()
+    }
 }
