@@ -1,5 +1,5 @@
 var rockets;
-var generationSize = 10;
+var generationSize = 100;
 
 var startpoint = { x: 10, y: 50, }
 var target;
@@ -14,8 +14,10 @@ var generation = 0;
 var pLife;
 var pGen;
 
+let motationProbability = 0.1;
+
 function setup() {
-    frameRate(10);
+    frameRate(25);
     createCanvas(640, 480);
     pLife = createP('')
     pGen = createP('')
@@ -74,6 +76,13 @@ function sFact(num) {
     return rval;
 }
 
+function numSum(num) {
+    var rval = 0;
+    for (var i = 0; i <= num; i++)
+        rval += i;
+    return rval
+}
+
 function createNextGeneration() {
     generation++;
 
@@ -82,46 +91,38 @@ function createNextGeneration() {
             (a.fitness > b.fitness ? 1 : 0);
     })
 
-    let lastPropability = 0;
-    //https://en.wikipedia.org/wiki/Fitness_proportionate_selection
-    for (let i = 0; i < sortedRockets.length; i++) {
-        let rocket = sortedRockets[i];
-
-        let nextPropability = lastPropability + ((i + 1) / sFact(sortedRockets.length));
-
-        rocket.minProp = lastPropability;
-        rocket.maxProp = nextPropability;
-
-        lastPropability = nextPropability;
-    }
+    addWeights(sortedRockets.reverse());
 
     let deleted = 0;
-    while (deleted < generationSize / 4) {
-        let value = random();
-        for (let i = 0; i < sortedRockets; i++) {
-            let rocket = sortedRockets[i];
-            if (!rocket) {
-                continue;
-            }
-            if (rocket.minProp > value) {
-                break;
-            }
-
-            if (rocket.minProp <= value && rocket.maxProp > value) {
-                sortedRockets.splice(i, 1);
-                deleted++;
-                break;
-            }
+    let max_delete = ceil(generationSize / 4);
+    while (deleted < max_delete) {
+        let rocket = getRandomRocket(sortedRockets)
+        if (rocket) {
+            let i = sortedRockets.indexOf(rocket);
+            sortedRockets.splice(i, 1);
+            deleted++;
         }
     }
     console.log(sortedRockets);
 
+    addWeights(sortedRockets.reverse());
+
     rockets = [];
     for (let i = 0; i < generationSize; i++) {
-        let dna = [];
+        let father = getRandomRocket(sortedRockets);
+        let mother = getRandomRocket(sortedRockets);
+        while (mother != father) {
+            mother = getRandomRocket(sortedRockets);
+        }
 
+        let dna = [];
         for (let j = 0; j < cellCount; j++) {
-            let data = p5.Vector.fromAngle(random(2 * PI));
+            let data = random() > 0.5 ? father.dna[j].copy() : mother.dna[j].copy();
+
+            if (random() > 1 - motationProbability) {
+                data = p5.Vector.fromAngle(random(2 * PI));
+            }
+
             dna.push(data);
         }
 
@@ -131,6 +132,44 @@ function createNextGeneration() {
     lifespan = 100;
 }
 
+function addWeights(sortedRockets) {
+    let lastWeight = 0;
+    let sumSum = numSum(sortedRockets.length);
+
+    //https://en.wikipedia.org/wiki/Fitness_proportionate_selection
+    for (let i = 0; i < sortedRockets.length; i++) {
+        let rocket = sortedRockets[i];
+
+        let propab = ((i + 1) / sumSum);
+
+        let nextWeight = lastWeight + propab;
+
+        rocket.minProp = lastWeight;
+        rocket.maxProp = nextWeight;
+
+        lastWeight = nextWeight;
+    }
+
+    return sortedRockets;
+}
+
+function getRandomRocket(sortedRockets) {
+    let value = random();
+    for (let i = 0; i < sortedRockets.length; i++) {
+        let rocket = sortedRockets[i];
+        if (!rocket) {
+            continue;
+        }
+        if (rocket.minProp > value) {
+            return null;
+        }
+
+        if (rocket.minProp <= value && rocket.maxProp > value) {
+            return rocket;
+        }
+    }
+}
+
 function Rocket(x_, y_, angle_, dna_) {
     this.pos = createVector(x_, y_);
     this.angle = angle_;
@@ -138,12 +177,26 @@ function Rocket(x_, y_, angle_, dna_) {
     this.dna = dna_;
     this.fitness = 0;
 
+    this.blocked = false;
+
     this.update = () => {
-        let direction = this.dna[floor(this.pos.x / cellSize) + floor(this.pos.y / cellSize) * cols]
-        // console.log(direction)
-        this.pos.add(direction.x, direction.y);
-        this.angle = direction.heading();
-        this.calculateFitness();
+        if (!this.calculateBlocked()) {
+
+            let direction = this.dna[floor(this.pos.x / cellSize) + floor(this.pos.y / cellSize) * cols]
+            // console.log(direction)
+            this.pos.add(direction.x, direction.y);
+            this.angle = direction.heading();
+            this.calculateFitness();
+        }
+    }
+
+    this.calculateBlocked = () => {
+        this.blocked = (this.blocked ||
+            this.pos.x < 0 ||
+            this.pos.x > width ||
+            this.pos.y < 0 ||
+            this.pos.y > height);
+        return this.blocked;
     }
 
     this.show = () => {
