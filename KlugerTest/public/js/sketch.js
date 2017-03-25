@@ -1,5 +1,7 @@
+// var oldGenerations = [];
+
 var rockets;
-var generationSize = 100;
+var generationSize = 250;
 
 var startpoint = { x: 10, y: 240, }
 var target;
@@ -9,7 +11,7 @@ var rows;
 var cellCount;
 
 var frate = 0;
-var totalLifeSpan = 750;
+var totalLifeSpan = 0;
 var lifespan = 0;
 var generation = 0;
 
@@ -20,13 +22,15 @@ var stats = [];
 
 var pfr;
 var pdm;
+var ptl;
 
-let motationProbability = 0.01;
+let motationProbability = 0.004;
 
 var fittestRocket = undefined;
 
 var sliderFrameRate;
 var sliderDrawMod;
+var sliderTotalLifespan;
 
 function createRandomVector(angles) {
     var multiplicator = floor(random() * angles);
@@ -36,16 +40,23 @@ function createRandomVector(angles) {
 }
 
 function setup() {
-    createCanvas(480, 480);
+    let c = createCanvas(480, 480);
+    c.parent('fholder');
+    let p =createP('');
+    p.parent('fholder');
+    let b = createFullscreenButtonForDomElement(document.getElementById('fholder'));
+    b.parent('fholder')
     pLife = createP('')
     pGen = createP('')
 
     pfr = createP('Frame Rate:');
 
-    sliderFrameRate = createSlider(1, 120, 25);
+    sliderFrameRate = createSlider(1, 120, 120);
     pdm = createP('Draw on Keyframe:');
     sliderDrawMod = createSlider(1, 100, 1);
 
+    ptl = createP('Total Lifespan:');
+    sliderTotalLifespan = createSlider(1, 1000, 450);
     pStats = createP('');
 
     noSmooth();
@@ -88,6 +99,12 @@ function draw() {
         pdm.html('Draw on Keyframe: ' + drawMod);
     }
 
+    if (totalLifeSpan != sliderTotalLifespan.value()) {
+
+        totalLifeSpan = sliderTotalLifespan.value();
+        ptl.html('Total Lifespan: ' + totalLifeSpan);
+    }
+
     frameRate(frate);
 
     fittestRocket = undefined;
@@ -97,6 +114,36 @@ function draw() {
     }
     if ((lifespan - 1) % drawMod === 0) {
         background(155);
+
+
+        noStroke();
+
+        // fill(75);
+        //         rectMode(CENTER);
+        //         rect(0 + 10,height - 10, 16, 10);
+        fill(255);
+        textAlign(LEFT, TOP);
+        textSize(8);
+        text("Frame Rate: " + frameRate(), 2, height - 10);
+
+
+        for (let i = 0; i < stats.length; i++) {
+            let stat = stats[i];
+            let fittestR = stat.fittestRocket;
+            if (fittestR) {
+                noStroke();
+                fill(75)
+                rectMode(CENTER);
+                rect(fittestR.pos.x, fittestR.pos.y, 16, 10);
+                fill(255);
+                // stroke(100,100,255);
+                textAlign(CENTER, CENTER);
+                textSize(8);
+                text(stat.generation, fittestR.pos.x, fittestR.pos.y);
+            }
+        }
+
+
         stroke(100);
         fill(0);
         ellipse(target.pos.x, target.pos.y, target.r);
@@ -109,13 +156,19 @@ function draw() {
             }
         }
 
-        fill(0);
-        stroke(0);
-        strokeWeight(1);
-        line(fittestRocket.pos.x, fittestRocket.pos.y, target.pos.x, target.pos.y);
+        if (fittestRocket) {
+            fill(0);
+            stroke(0);
+            strokeWeight(1);
+            line(fittestRocket.pos.x, fittestRocket.pos.y, target.pos.x, target.pos.y);
 
+            noFill();
+            stroke(90);
+            strokeWeight(1);
+            ellipse(target.pos.x, target.pos.y, 2 * (fittestRocket.distance) + target.r);
 
-        fittestRocket.show();
+            fittestRocket.show();
+        }
 
         pLife.html('Lifespan: ' + lifespan);
         pGen.html('Generation: ' + generation);
@@ -145,6 +198,13 @@ function numSum(num) {
 }
 
 function createNextGeneration() {
+
+    if (generation == 0) {
+        lifespan = totalLifeSpan;
+        generation++;
+        return;
+    }
+
     stats.push({
         generation: generation,
         fittestRocket: fittestRocket,
@@ -165,37 +225,42 @@ function createNextGeneration() {
     }
     pStats.html(shtml);
 
-    generation++;
 
     let sortedRockets = rockets.slice().sort((a, b) => {
         return a.fitness < b.fitness ? -1 :
             (a.fitness > b.fitness ? 1 : 0);
     })
 
-    addWeights(sortedRockets.reverse());
-
-    let deleted = 0;
-    let max_delete = ceil(generationSize * (2 / 4));
-    while (deleted < max_delete) {
-        let rocket = getRandomRocket(sortedRockets)
-        if (rocket) {
-            let i = sortedRockets.indexOf(rocket);
-            sortedRockets.splice(i, 1);
-            deleted++;
-        }
-    }
-    // console.log(sortedRockets);
-
-    addWeights(sortedRockets.reverse());
-
-    // rockets = [];
-    // for (let i = 0; i < generationSize; i++) {
+    addWeights(sortedRockets);
+    // oldGenerations.push(sortedRockets.slice());
 
     rockets = [];
-    for (let i = 0; i < sortedRockets.length; i++) {
-        rockets.push(sortedRockets[i].copy());
-    }
+
+    // addWeights(sortedRockets.reverse());
+
+    // let deleted = 0;
+    // let max_delete = ceil(generationSize * (2 / 4));
+    // while (deleted < max_delete) {
+    //     let rocket = getRandomRocket(sortedRockets)
+    //     if (rocket) {
+    //         let i = sortedRockets.indexOf(rocket);
+    //         sortedRockets.splice(i, 1);
+    //         deleted++;
+    //     }
+    // }
+    // console.log(sortedRockets);
+
+    // addWeights(sortedRockets.reverse());
+
+    // rockets = [];
+    //     for (let i = 0; i < sortedRockets.length; i++) {
+    //         rockets.push(sortedRockets[i].copy());
+    //     }
+
+    let nextDnaCount = 0
+    let mutations = 0
     while (rockets.length < generationSize) {
+
         let father = getRandomRocket(sortedRockets);
         let mother = getRandomRocket(sortedRockets);
         while (mother != father) {
@@ -208,14 +273,18 @@ function createNextGeneration() {
 
             if (random() > 1 - motationProbability) {
                 data = createRandomVector(8); //p5.Vector.fromAngle(random(2 * PI));
+                mutations++;
             }
-
+            nextDnaCount++;
             dna.push(data);
         }
 
         let rocket = new Rocket(startpoint.x, startpoint.y, random(2 * PI), dna);
         rockets.push(rocket);
     }
+    console.log(mutations + " Mutationen bei " + nextDnaCount + " neuen DNA Zuweisungen. (" + round(100 * (mutations / nextDnaCount) * 100) / 100 + "%)");
+    generation++;
+
     lifespan = totalLifeSpan;
 }
 

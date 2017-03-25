@@ -5,6 +5,7 @@ function Rocket(x_, y_, angle_, dna_) {
 
     this.dna = dna_;
     this.fitness = 0;
+    this.fitnesses = [];
 
     this.blocked = false;
     this.done = false;
@@ -14,7 +15,12 @@ function Rocket(x_, y_, angle_, dna_) {
     }
 
     this.update = () => {
-        if (!this.calculateBlocked() && !this.calculateDone()) {
+        
+        this.calculateBlocked();
+        this.calculateDone();
+        this.calculateFitness();
+        
+        if (!this.blocked && !this.done) {
 
             let direction = this.dna[floor(this.pos.x / cellSize) + floor(this.pos.y / cellSize) * cols]
 
@@ -27,7 +33,6 @@ function Rocket(x_, y_, angle_, dna_) {
             // console.log(direction)
             this.pos.add(direction.x, direction.y);
             this.angle = direction.heading();
-            this.calculateFitness();
         }
     }
 
@@ -74,23 +79,40 @@ function Rocket(x_, y_, angle_, dna_) {
     }
 
     this.calculateFitness = () => {
-        if (!fittestRocket || fittestRocket.fitness < this.fitness) {
-            fittestRocket = this;
-        }
 
-        this.fitness = 1 / sqrt(1 + this.getDistance());
-
+        this.fitness = 0;
+        let f = 1 / (1 + this.getDistance());
         if (this.blocked) {
-            this.fitness /= 4;
+            f /= 4;
         }
+
+        if (this.done) {
+            f *= 4;
+        }
+        this.fitnesses.push(f);
+        let fSum =0;
+
+        for (let i = 0; i < this.fitnesses.length; i++) {
+            this.fitness += (this.fitnesses[i] * i+1);
+            fSum +=(i+1);
+        }
+        this.fitness /= fSum;
 
         if (this.done) {
             this.fitness *= 4;
         }
+
+        if (!fittestRocket || fittestRocket.fitness < this.fitness) {
+            fittestRocket = this;
+        }
+
         return this.fitness;
     }
+
+    this.distance;
     this.getDistance = () => {
-        let f = this.pos.dist(target.pos) - target.r;
-        return f > 0 ? f : 0;
+        let f = this.pos.dist(target.pos) - (target.r / 2);
+        this.distance = f > 0 ? f : 0;
+        return this.distance;
     }
 }
