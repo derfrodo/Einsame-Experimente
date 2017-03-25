@@ -7,9 +7,9 @@ function Rocket(x_, y_, angle_, dna_) {
     this.fitness = 0;
 
     this.blocked = false;
-
+    this.done = false;
     this.update = () => {
-        if (!this.calculateBlocked()) {
+        if (!this.calculateBlocked() && !this.calculateDone()) {
 
             let direction = this.dna[floor(this.pos.x / cellSize) + floor(this.pos.y / cellSize) * cols]
 
@@ -34,6 +34,13 @@ function Rocket(x_, y_, angle_, dna_) {
             this.pos.y > height);
         return this.blocked;
     }
+
+    this.calculateDone = () => {
+        this.done = !this.blocked && (this.done ||
+            this.getDistance() <= target.r
+        )
+    }
+
 
     this.show = () => {
 
@@ -66,10 +73,14 @@ function Rocket(x_, y_, angle_, dna_) {
             fittestRocket = this;
         }
 
-        this.fitness = 1 / (1 + this.getDistance());
+        this.fitness = 1 / sqrt(1 + this.getDistance());
 
         if (this.blocked) {
             this.fitness /= 4;
+        }
+
+        if(this.done){
+            this.fitness *=4;
         }
         return this.fitness;
     }
