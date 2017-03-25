@@ -120,9 +120,14 @@ function createNextGeneration() {
     var shtml = "";
     for (let i = 0; i < stats.length; i++) {
         let stat = stats[i];
-        shtml += `Generation: ${stat.generation}; Best Fitness: ${stat.fitness}; Distance: ${stat.distance} <br />`;
-    }
+        let str = `Generation: ${stat.generation}; Best Fitness: ${stat.fitness}; Distance: ${stat.distance}`;
+        if (i + 1 == stats.length) {
+            console.log(str);
 
+        }
+        shtml += str + "<br />";
+
+    }
     pStats.html(shtml);
 
     generation++;
