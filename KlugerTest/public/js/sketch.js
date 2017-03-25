@@ -8,19 +8,33 @@ var cols;
 var rows;
 var cellCount;
 
+var frate = 60;
+var totalLifeSpan = 750;
 var lifespan = 0;
 var generation = 0;
 
 var pLife;
 var pGen;
+var pStats;
+var stats = [];
 
-let motationProbability = 0.1;
+let motationProbability = 0.01;
+
+var fittestRocket = undefined;
+
+function createRandomVector(angles) {
+    var multiplicator = floor(random() * angles);
+
+    let data = p5.Vector.fromAngle(2 * PI * (multiplicator / angles));
+    return data;
+}
 
 function setup() {
-    frameRate(25);
+    frameRate(frate);
     createCanvas(640, 480);
     pLife = createP('')
     pGen = createP('')
+    pStats = createP('');
 
     noSmooth();
     background(155);
@@ -37,7 +51,7 @@ function setup() {
         let dna = [];
 
         for (let j = 0; j < cellCount; j++) {
-            let data = p5.Vector.fromAngle(random(2 * PI));
+            let data = createRandomVector(8);
             dna.push(data);
         }
 
@@ -45,7 +59,7 @@ function setup() {
         rockets.push(rocket);
     }
 
-    lifespan = 100;
+    lifespan = totalLifeSpan;
 };
 
 function draw() {
@@ -53,11 +67,22 @@ function draw() {
     stroke(100);
     fill(0);
     ellipse(target.pos.x, target.pos.y, target.r);
+
+    fittestRocket = undefined;
     for (let i = 0; i < generationSize; i++) {
         let rocket = rockets[i];
-        rocket.show();
         rocket.update();
     }
+
+    for (let i = 0; i < generationSize; i++) {
+        let rocket = rockets[i];
+        if (rocket !== fittestRocket) {
+            rocket.show();
+
+        }
+    }
+
+    fittestRocket.show();
 
     lifespan--;
     if (lifespan <= 0) {
@@ -67,6 +92,7 @@ function draw() {
     pGen.html('Generation: ' + generation);
 
 };
+
 
 /** http://stackoverflow.com/questions/3959211/fast-factorial-function-in-javascript */
 function sFact(num) {
@@ -84,6 +110,21 @@ function numSum(num) {
 }
 
 function createNextGeneration() {
+    stats.push({
+        generation: generation,
+        fittestRocket: fittestRocket,
+        fitness: fittestRocket.fitness,
+        distance: fittestRocket.getDistance(),
+    });
+
+    var shtml = "";
+    for (let i = 0; i < stats.length; i++) {
+        let stat = stats[i];
+        shtml += `Generation: ${stat.generation}; Best Fitness: ${stat.fitness}; Distance: ${stat.distance} <br />`;
+    }
+
+    pStats.html(shtml);
+
     generation++;
 
     let sortedRockets = rockets.slice().sort((a, b) => {
@@ -103,7 +144,7 @@ function createNextGeneration() {
             deleted++;
         }
     }
-    console.log(sortedRockets);
+    // console.log(sortedRockets);
 
     addWeights(sortedRockets.reverse());
 
@@ -120,7 +161,7 @@ function createNextGeneration() {
             let data = random() > 0.5 ? father.dna[j].copy() : mother.dna[j].copy();
 
             if (random() > 1 - motationProbability) {
-                data = p5.Vector.fromAngle(random(2 * PI));
+                data = createRandomVector(8); //p5.Vector.fromAngle(random(2 * PI));
             }
 
             dna.push(data);
@@ -129,7 +170,7 @@ function createNextGeneration() {
         let rocket = new Rocket(startpoint.x, startpoint.y, random(2 * PI), dna);
         rockets.push(rocket);
     }
-    lifespan = 100;
+    lifespan = totalLifeSpan;
 }
 
 function addWeights(sortedRockets) {
@@ -167,61 +208,5 @@ function getRandomRocket(sortedRockets) {
         if (rocket.minProp <= value && rocket.maxProp > value) {
             return rocket;
         }
-    }
-}
-
-function Rocket(x_, y_, angle_, dna_) {
-    this.pos = createVector(x_, y_);
-    this.angle = angle_;
-
-    this.dna = dna_;
-    this.fitness = 0;
-
-    this.blocked = false;
-
-    this.update = () => {
-        if (!this.calculateBlocked()) {
-
-            let direction = this.dna[floor(this.pos.x / cellSize) + floor(this.pos.y / cellSize) * cols]
-            // console.log(direction)
-            this.pos.add(direction.x, direction.y);
-            this.angle = direction.heading();
-            this.calculateFitness();
-        }
-    }
-
-    this.calculateBlocked = () => {
-        this.blocked = (this.blocked ||
-            this.pos.x < 0 ||
-            this.pos.x > width ||
-            this.pos.y < 0 ||
-            this.pos.y > height);
-        return this.blocked;
-    }
-
-    this.show = () => {
-
-        push();
-        stroke(0);
-        strokeWeight(1);
-        fill(255);
-
-        let v1 = p5.Vector.fromAngle(this.angle);
-        v1.setMag(16);
-        let v2 = v1.copy();
-        v1.rotate(0.1 * PI);
-        v2.rotate(-0.1 * PI);
-
-        beginShape()
-        vertex(this.pos.x, this.pos.y);
-        vertex(this.pos.x - v1.x, this.pos.y - v1.y);
-        vertex(this.pos.x - v2.x, this.pos.y - v2.y);
-        endShape(CLOSE);
-        pop();
-    }
-
-    this.calculateFitness = () => {
-        this.fitness = 1 / (1 + this.pos.dist(target.pos));
-        return this.fitness;
     }
 }
