@@ -1,14 +1,14 @@
 var rockets;
 var generationSize = 100;
 
-var startpoint = { x: 10, y: 50, }
+var startpoint = { x: 10, y: 240, }
 var target;
 var cellSize = 10;
 var cols;
 var rows;
 var cellCount;
 
-var frate = 60;
+var frate = 0;
 var totalLifeSpan = 750;
 var lifespan = 0;
 var generation = 0;
@@ -18,9 +18,15 @@ var pGen;
 var pStats;
 var stats = [];
 
+var pfr;
+var pdm;
+
 let motationProbability = 0.01;
 
 var fittestRocket = undefined;
+
+var sliderFrameRate;
+var sliderDrawMod;
 
 function createRandomVector(angles) {
     var multiplicator = floor(random() * angles);
@@ -30,16 +36,22 @@ function createRandomVector(angles) {
 }
 
 function setup() {
-    frameRate(frate);
-    createCanvas(640, 480);
+    createCanvas(480, 480);
     pLife = createP('')
     pGen = createP('')
+
+    pfr = createP('Frame Rate:');
+
+    sliderFrameRate = createSlider(1, 120, 25);
+    pdm = createP('Draw on Keyframe:');
+    sliderDrawMod = createSlider(1, 100, 1);
+
     pStats = createP('');
 
     noSmooth();
     background(155);
 
-    target = { pos: createVector(580, 240), r: 24, };
+    target = { pos: createVector(420, 240), r: 24, };
 
 
     cols = width / cellSize;
@@ -62,34 +74,57 @@ function setup() {
     lifespan = totalLifeSpan;
 };
 
+let drawMod = 0;
+
 function draw() {
-    background(155);
-    stroke(100);
-    fill(0);
-    ellipse(target.pos.x, target.pos.y, target.r);
+
+    if (frate != sliderFrameRate.value()) {
+        frate = sliderFrameRate.value();
+        pfr.html('Frame Rate: ' + frate);
+    }
+    if (drawMod != sliderDrawMod.value()) {
+
+        drawMod = sliderDrawMod.value();
+        pdm.html('Draw on Keyframe: ' + drawMod);
+    }
+
+    frameRate(frate);
 
     fittestRocket = undefined;
     for (let i = 0; i < generationSize; i++) {
         let rocket = rockets[i];
         rocket.update();
     }
+    if ((lifespan - 1) % drawMod === 0) {
+        background(155);
+        stroke(100);
+        fill(0);
+        ellipse(target.pos.x, target.pos.y, target.r);
 
-    for (let i = 0; i < generationSize; i++) {
-        let rocket = rockets[i];
-        if (rocket !== fittestRocket) {
-            rocket.show();
+        for (let i = 0; i < generationSize; i++) {
+            let rocket = rockets[i];
+            if (rocket !== fittestRocket) {
+                rocket.show();
 
+            }
         }
-    }
 
-    fittestRocket.show();
+        fill(0);
+        stroke(0);
+        strokeWeight(1);
+        line(fittestRocket.pos.x, fittestRocket.pos.y, target.pos.x, target.pos.y);
+
+
+        fittestRocket.show();
+
+        pLife.html('Lifespan: ' + lifespan);
+        pGen.html('Generation: ' + generation);
+    }
 
     lifespan--;
     if (lifespan <= 0) {
         createNextGeneration();
     }
-    pLife.html('Lifespan: ' + lifespan);
-    pGen.html('Generation: ' + generation);
 
 };
 
@@ -140,7 +175,7 @@ function createNextGeneration() {
     addWeights(sortedRockets.reverse());
 
     let deleted = 0;
-    let max_delete = ceil(generationSize / 4);
+    let max_delete = ceil(generationSize * (2 / 4));
     while (deleted < max_delete) {
         let rocket = getRandomRocket(sortedRockets)
         if (rocket) {
@@ -153,8 +188,14 @@ function createNextGeneration() {
 
     addWeights(sortedRockets.reverse());
 
+    // rockets = [];
+    // for (let i = 0; i < generationSize; i++) {
+
     rockets = [];
-    for (let i = 0; i < generationSize; i++) {
+    for (let i = 0; i < sortedRockets.length; i++) {
+        rockets.push(sortedRockets[i].copy());
+    }
+    while (rockets.length < generationSize) {
         let father = getRandomRocket(sortedRockets);
         let mother = getRandomRocket(sortedRockets);
         while (mother != father) {

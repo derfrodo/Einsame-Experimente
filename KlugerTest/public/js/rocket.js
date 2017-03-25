@@ -8,6 +8,11 @@ function Rocket(x_, y_, angle_, dna_) {
 
     this.blocked = false;
     this.done = false;
+
+    this.copy = () => {
+        return new Rocket(x_, y_, angle_, dna_);
+    }
+
     this.update = () => {
         if (!this.calculateBlocked() && !this.calculateDone()) {
 
@@ -37,7 +42,7 @@ function Rocket(x_, y_, angle_, dna_) {
 
     this.calculateDone = () => {
         this.done = !this.blocked && (this.done ||
-            this.getDistance() <= target.r
+            this.getDistance() <= 0
         )
     }
 
@@ -79,12 +84,13 @@ function Rocket(x_, y_, angle_, dna_) {
             this.fitness /= 4;
         }
 
-        if(this.done){
-            this.fitness *=4;
+        if (this.done) {
+            this.fitness *= 4;
         }
         return this.fitness;
     }
     this.getDistance = () => {
-        return this.pos.dist(target.pos);
+        let f = this.pos.dist(target.pos) - target.r;
+        return f > 0 ? f : 0;
     }
 }
