@@ -8,7 +8,7 @@ function Rocket(x_, y_, angle_, dna_) {
     this.fitnesses = [];
 
     this.blocked = false;
-    this.done = false;
+    this.done = false;  
 
     this.copy = () => {
         return new Rocket(x_, y_, angle_, dna_);

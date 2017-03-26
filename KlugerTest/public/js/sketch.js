@@ -24,7 +24,7 @@ var pfr;
 var pdm;
 var ptl;
 
-let motationProbability = 0.004;
+let motationProbability = 0.014;
 
 var fittestRocket = undefined;
 
@@ -42,7 +42,7 @@ function createRandomVector(angles) {
 function setup() {
     let c = createCanvas(480, 480);
     c.parent('fholder');
-    let p =createP('');
+    let p = createP('');
     p.parent('fholder');
     let b = createFullscreenButtonForDomElement(document.getElementById('fholder'));
     b.parent('fholder')
@@ -230,32 +230,30 @@ function createNextGeneration() {
         return a.fitness < b.fitness ? -1 :
             (a.fitness > b.fitness ? 1 : 0);
     })
-
-    addWeights(sortedRockets);
     // oldGenerations.push(sortedRockets.slice());
 
-    rockets = [];
-
-    // addWeights(sortedRockets.reverse());
-
-    // let deleted = 0;
-    // let max_delete = ceil(generationSize * (2 / 4));
-    // while (deleted < max_delete) {
-    //     let rocket = getRandomRocket(sortedRockets)
-    //     if (rocket) {
-    //         let i = sortedRockets.indexOf(rocket);
-    //         sortedRockets.splice(i, 1);
-    //         deleted++;
-    //     }
-    // }
-    // console.log(sortedRockets);
-
-    // addWeights(sortedRockets.reverse());
-
+    // addWeights(sortedRockets);
     // rockets = [];
-    //     for (let i = 0; i < sortedRockets.length; i++) {
-    //         rockets.push(sortedRockets[i].copy());
-    //     }
+
+    addWeights(sortedRockets.reverse());
+
+    let deleted = 0;
+    let max_delete = ceil(generationSize * (2 / 4));
+    while (deleted < max_delete) {
+        let rocket = getRandomRocket(sortedRockets)
+        if (rocket) {
+            let i = sortedRockets.indexOf(rocket);
+            sortedRockets.splice(i, 1);
+            deleted++;
+        }
+    }
+
+    addWeights(sortedRockets.reverse());
+
+    rockets = [];
+    for (let i = 0; i < sortedRockets.length; i++) {
+        rockets.push(sortedRockets[i].copy());
+    }
 
     let nextDnaCount = 0
     let mutations = 0
