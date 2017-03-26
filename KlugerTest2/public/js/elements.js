@@ -1,3 +1,5 @@
+"use strict"
+
 const P_DRAW_FRAME = "Draw Every Frame";
 const P_FRAME_RATE = "Frame Rate";
 
@@ -21,25 +23,24 @@ const settings = new (function () {
     this.rows = 0;
 
 
-
-
 })();
 
-const cells = [];
+let grid;//= new Grid();
 
 function Point(x_, y_) {
     // this.x = x_;
     // this.y = y_;
-    const x = x_;
-    const y = y_;
+    this.x = x_;
+    this.y = y_;
 
     this.copy = () => {
+
         return new Point(this.x, this.y);
     }
 }
 
 function DNA(angle_) {
-    const angle = angle_;
+    this.angle = angle_;
 
     this.copy = () => {
         return angle;
@@ -50,7 +51,30 @@ function DNA(angle_) {
     }
 }
 
-function Cell(row_, col_) {
-    const col = col_;
-    const row = row_;
+function Cell() {
+    this.color = {};
+    this.text = "";
+}
+
+
+class Grid {
+
+    constructor() {
+        this.data = [];
+    }
+
+    getCell(rowOrIndex, col) {
+        let index = !col ? rowOrIndex : this.calculateIndex(rowOrIndex, col);
+        return this.data[index];
+    }
+
+    setCell(row, col, data_) {
+        let index = this.calculateIndex(row, col);
+        this.data[index] = data_;
+    }
+
+    calculateIndex(row, col) {
+        let index = col + (settings.cols) * row;
+        return index;
+    }
 }
