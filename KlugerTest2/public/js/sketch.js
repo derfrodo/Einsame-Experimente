@@ -1,27 +1,27 @@
 function setup() {
-    canvases[C_CANVAS] = createCanvas(100, 100);
+    canvases[C_CANVAS] = createCanvas(480, 480);
 
     noSmooth();
     background(0);
 
-    settings.cols = ceil(width / settings.cellSize);
-    settings.rows = ceil(height / settings.cellSize);
+    settings.cols = ceil(width / (settings.cellSize));
+    settings.rows = ceil(height / (settings.cellSize));
     settings.frameRate = 15;
     frameRate(settings.frameRate);
 
     grid = new Grid();
     // makeSomeStuff()
 
-    for (let i = 0; i < settings.cols + 1; i++) {
-        for (let j = 0; j < settings.rows + 1; j++) {
-            let cell = new Cell();
+    for (let i = 0; i < settings.rows; i++) {
+        for (let j = 0; j < settings.cols; j++) {
+            let cell = new Cell(i, j);
             cell.color = {
                 v1: rndByte(),
                 v2: rndByte(),
                 v3: rndByte(),
             };
-            cell.text = "C" + i + "R" + j;
-            grid.setCell(j, i, cell)
+            cell.text = "r" + i + "c" + j;
+            grid.setCell(i, j, cell)
         }
     }
 
@@ -45,21 +45,18 @@ function rndByte() {
 
 function makeSomeStuff() {
     noStroke();
+
     for (let i = 0; i < settings.rows; i++) {
         for (let j = 0; j < settings.cols; j++) {
-            let cell = grid.getCell(j, i);
+            let cell = grid.getCell(i, j);
+            cell.show();
 
-            fill(cell.color.v1, cell.color.v2, cell.color.v3)
-            ellipse(j * settings.cellSize + settings.cellSize / 2,
-                i * settings.cellSize + settings.cellSize / 2,
-                settings.cellSize);
+            // fill(cell.color.v1, cell.color.v2, cell.color.v3)
+            // ellipse(x, y, settings.cellSize);
 
-            textAlign(CENTER, CENTER);
-            textSize(16);
-            text(cell.text);
         }
     }
-    
+
 }
 
 // // var oldGenerations = [];
