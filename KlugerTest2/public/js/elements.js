@@ -57,6 +57,8 @@ class Cell {
         this.col = col;
         this.color = {};
         this.text = "";
+        this._angle = 0;
+        this._direction = createVector(1, 0);
     }
 
     get x() {
@@ -67,18 +69,35 @@ class Cell {
         return this.row * (settings.cellSize);
     }
 
+    set angle(angle) {
+        this._angle = angle;
+        this._direction = p5.Vector.fromAngle(angle);
+    }
+
     show() {
 
         let c = this.color;
+
         noFill()
-        stroke(c.v1, c.v2, c.v3)
+        stroke(c.v1, c.v2, c.v3,64)
         rect(this.x, this.y, settings.cellSize - 1, settings.cellSize - 1)
 
-        noStroke();
-        fill(c.v1, c.v2, c.v3)
-        textAlign(CENTER, CENTER);
-        textSize(10);
-        text(this.text, this.x + settings.cellSize / 2, this.y + settings.cellSize / 2);
+        // noStroke();
+        // fill(c.v1, c.v2, c.v3)
+        // textAlign(CENTER, CENTER);
+        // textSize(10);
+        // text(this.text, this.x + settings.cellSize / 2, this.y + settings.cellSize / 2);
+
+
+        let lmx = this.x + settings.cellSize /2;
+        let lmy = this.y + settings.cellSize /2;
+        let hcs = settings.cellSize / 4;
+
+        line(lmx + (this._direction.x * hcs),
+            lmy + (this._direction.y * hcs),
+            lmx - (this._direction.x * hcs),
+            lmy - (this._direction.y * hcs))
+
     }
 }
 

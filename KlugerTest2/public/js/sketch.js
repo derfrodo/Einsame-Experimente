@@ -21,21 +21,23 @@ function setup() {
                 v3: rndByte(),
             };
             cell.text = "r" + i + "c" + j;
+
+            cell.angle = (floor(random() * 8)/8) * TWO_PI;
+
             grid.setCell(i, j, cell)
         }
     }
 
 }
 
-
 function draw() {
     background(0);
-    push();
-    translate(width / 2, height / 2);
-
-    translate(-width / 2, - height / 2);
     makeSomeStuff();
-    pop();
+
+    stroke(192)
+    line(0,mouseY,width, mouseY)
+    line(mouseX,0,mouseX,width);
+
 }
 
 /** Liefert ein Integer wert zwischen [0,...,255] */
@@ -56,8 +58,9 @@ function makeSomeStuff() {
 
         }
     }
-
 }
+
+
 
 // // var oldGenerations = [];
 
