@@ -105,9 +105,8 @@ class Cell {
 class Grid {
 
     constructor() {
-        this.data = [];
+        this._data = [];
     }
-
 
     /** 
      * Ich tu allg. was
@@ -118,12 +117,12 @@ class Grid {
         /// <summary>Liefert eine Zelle zurück, welche dem index entspricht oder der row, col Kombination sofern eine col angegeben wird</summary>  
         /// <returns type="Cell">The area.</returns>  
         let index = (!col && col !== 0) ? rowOrIndex : this.calculateIndex(rowOrIndex, col);
-        return this.data[index];
+        return this._data[index];
     }
 
     setCell(row, col, data_) {
         let index = this.calculateIndex(row, col);
-        this.data[index] = data_;
+        this._data[index] = data_;
     }
 
     calculateIndex(row, col) {
@@ -132,9 +131,15 @@ class Grid {
     }
 
     *getIndexes() {
-        for (let index in this.data) {
+        for (let index in this._data) {
             yield index;
         }
     }
 
+}
+
+class Rocket{
+    constructor(grid){
+        this._grid = grid;
+    }
 }
