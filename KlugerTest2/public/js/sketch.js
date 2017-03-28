@@ -35,17 +35,20 @@ function draw() {
     let markRow = floor(settings.rows / 2);
 
 
-    let md = (millis() % 2500) / 1250;
+    let md = (millis() % 1500) / 750;
 
-    let markCol = floor((settings.cols) * md);
+    let markCol = floor((settings.cols-5) * md)+2;
+    let markCol2 = ceil((settings.cols-5) * md)+2;
 
-    if (md > 1){
-        markCol = floor((settings.cols) * (2-md));
+    if (md > 1) {
+        markCol = floor((settings.cols-5) * (2 - md))+2;
+        markCol2 = ceil((settings.cols-5) * (2 - md))+2;
     }
 
 
 
     let markIndex = grid.calculateIndex(markRow, markCol);
+    let markIndex2 = grid.calculateIndex(markRow, markCol2);
 
     let iterator = grid.getIndexes();
     let item = iterator.next();
@@ -55,7 +58,7 @@ function draw() {
         // grid.getCell(iterator.value).isMarked = false;
 
         cell = grid.getCell(item.value);
-        cell.isMarked = !(item.value != markIndex);
+        cell.isMarked = !(item.value != markIndex && item.value != markIndex2);
         item = iterator.next();
     } while (item != undefined && !item.done)
 
