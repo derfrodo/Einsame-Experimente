@@ -59,6 +59,7 @@ class Cell {
         this.text = "";
         this._angle = 0;
         this._direction = createVector(1, 0);
+        this.isMarked=false;
     }
 
     get x() {
@@ -75,11 +76,17 @@ class Cell {
     }
 
     show() {
-
         let c = this.color;
 
-        noFill()
-        stroke(c.v1, c.v2, c.v3,64)
+        if (this.insideCell(mouseX, mouseY) || this.isMarked) {
+            stroke(255 - c.v1, 255 - c.v2, 255 - c.v3, 255)
+            fill(c.v1, c.v2, c.v3, 255)
+        }
+        else {
+            noFill()
+            stroke(c.v1, c.v2, c.v3, 255)
+        }
+
         rect(this.x, this.y, settings.cellSize - 1, settings.cellSize - 1)
 
         // noStroke();
@@ -88,16 +95,23 @@ class Cell {
         // textSize(10);
         // text(this.text, this.x + settings.cellSize / 2, this.y + settings.cellSize / 2);
 
-
-        let lmx = this.x + settings.cellSize /2;
-        let lmy = this.y + settings.cellSize /2;
+        let lmx = this.x + settings.cellSize / 2;
+        let lmy = this.y + settings.cellSize / 2;
         let hcs = settings.cellSize / 4;
 
         line(lmx + (this._direction.x * hcs),
             lmy + (this._direction.y * hcs),
             lmx - (this._direction.x * hcs),
             lmy - (this._direction.y * hcs))
+    }
 
+    /** 
+     * Liefert die Infos, ob der aus dem Punkt der durch die übergebenen
+     * Parameter definiert ist, innerhalb der Zelle liegt
+     */
+    insideCell(x_, y_) {
+        return (this.x < x_ && (this.x + settings.cellSize) > x_ &&
+            this.y < y_ && (this.y + settings.cellSize) > y_)
     }
 }
 
@@ -138,8 +152,8 @@ class Grid {
 
 }
 
-class Rocket{
-    constructor(grid){
-        this._grid = grid;
-    }
-}
+// class Rocket{
+//     constructor(grid){
+//         this._grid = grid;
+//     }
+// }

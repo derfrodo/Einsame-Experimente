@@ -22,21 +22,48 @@ function setup() {
             };
             cell.text = "r" + i + "c" + j;
 
-            cell.angle = (floor(random() * 8)/8) * TWO_PI;
+            cell.angle = (floor(random() * 8) / 8) * TWO_PI;
 
             grid.setCell(i, j, cell)
         }
     }
-
 }
 
 function draw() {
     background(0);
+
+    let markRow = floor(settings.rows / 2);
+
+
+    let md = (millis() % 2500) / 1250;
+
+    let markCol = floor((settings.cols) * md);
+
+    if (md > 1){
+        markCol = floor((settings.cols) * (2-md));
+    }
+
+
+
+    let markIndex = grid.calculateIndex(markRow, markCol);
+
+    let iterator = grid.getIndexes();
+    let item = iterator.next();
+    do {
+        // console.log(item)
+        // console.log(iterator.value)
+        // grid.getCell(iterator.value).isMarked = false;
+
+        cell = grid.getCell(item.value);
+        cell.isMarked = !(item.value != markIndex);
+        item = iterator.next();
+    } while (item != undefined && !item.done)
+
     makeSomeStuff();
 
     stroke(192)
-    line(0,mouseY,width, mouseY)
-    line(mouseX,0,mouseX,width);
+    line(0, mouseY, width, mouseY)
+    line(mouseX, 0, mouseX, width);
 
 }
 
