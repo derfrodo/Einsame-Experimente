@@ -191,7 +191,7 @@ class Rocket2 {
             this.lastCell = cell;
 
             let angle1 = (cell.angle - this.lastAngle);
-            if (angle1 <= HALF_PI) {
+            if (abs(angle1) <= HALF_PI) {
                 this.lastAngle = cell.angle;
             }
             else {
