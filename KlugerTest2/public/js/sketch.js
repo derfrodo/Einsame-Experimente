@@ -1,5 +1,9 @@
+let r;
 function setup() {
     canvases[C_CANVAS] = createCanvas(480, 480);
+
+console.log(390 %360);
+console.log(-390 %360);
 
     noSmooth();
     background(0);
@@ -27,6 +31,7 @@ function setup() {
             grid.setCell(i, j, cell)
         }
     }
+    r = new Rocket2(200,200,grid);
 }
 
 function draw() {
@@ -44,7 +49,6 @@ function draw() {
         markCol = floor((settings.cols-5) * (2 - md))+2;
         markCol2 = ceil((settings.cols-5) * (2 - md))+2;
     }
-
 
 
     let markIndex = grid.calculateIndex(markRow, markCol);
@@ -67,6 +71,9 @@ function draw() {
     stroke(192)
     line(0, mouseY, width, mouseY)
     line(mouseX, 0, mouseX, width);
+
+r.update();
+r.show()
 
 }
 

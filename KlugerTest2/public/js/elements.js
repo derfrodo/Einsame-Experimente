@@ -59,7 +59,7 @@ class Cell {
         this.text = "";
         this._angle = 0;
         this._direction = createVector(1, 0);
-        this.isMarked=false;
+        this.isMarked = false;
     }
 
     get x() {
@@ -68,6 +68,10 @@ class Cell {
 
     get y() {
         return this.row * (settings.cellSize);
+    }
+
+    get angle() {
+        return this._angle;
     }
 
     set angle(angle) {
@@ -144,12 +148,71 @@ class Grid {
         return index;
     }
 
+    getIndexForPosition(x, y) {
+        let col = floor(x / (settings.cellSize));
+        let row = floor(y / (settings.cellSize));
+        return this.calculateIndex(row, col);
+    }
+
     *getIndexes() {
         for (let index in this._data) {
             yield index;
         }
     }
 
+}
+
+
+class Rocket2 {
+    constructor(x_, y_, dna_) {
+        this.x = x_;
+        this.y = y_;
+        this.dna = dna_;
+        this.lastCell = this.getCell(this.x, this.y);
+        this.lastAngle = this.lastCell.angle;
+        this.isBlocked = false;
+    }
+
+    calculateBlocked() {
+        return this.isBlocked || this.x < 0 || this.x > width || this.y < 0 || this.y > height;
+    }
+
+    getCell(x, y) {
+        let index = this.dna.getIndexForPosition(x, y);
+        return this.dna.getCell(index);
+    }
+
+    update() {
+        if (this.calculateBlocked()) {
+            return;
+        }
+        let cell = this.getCell(this.x, this.y);
+        if (this.lastCell !== cell) {
+            this.lastCell = cell;
+
+            let angle1 = (cell.angle - this.lastAngle);
+            if (angle1 <= HALF_PI) {
+                this.lastAngle = cell.angle;
+            }
+            else {
+                this.lastAngle = (cell.angle + PI) % TWO_PI;
+            }
+            // let angle2 = ((PI + cell.angle) % TWO_PI) - this.lastAngles;
+            // this.lastAngle = abs(angle1) < abs(angle2) ? cell.angle : ((cell.angle + PI) % TWO_PI);
+        }
+        this.x += cos(this.lastAngle);
+        this.y += sin(this.lastAngle);
+    }
+
+    show() {
+        fill(255)
+        ellipse(this.x, this.y, 25, 25);
+        fill(0)
+        textSize(12)
+        textAlign(CENTER, CENTER)
+        text(this.lastCell.text, this.x, this.y)
+
+    }
 }
 
 // class Rocket{
